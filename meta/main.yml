@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: Dmitry Belaykov
+  description: This role will install docker engine and some additional tooling
+  license: MIT
+  min_ansible_version: 1.2
+  platforms:
+  - name: Ubuntu
+    versions:
+    - trusty
+  galaxy_tags:
+  - cloud
+  - system
+  - cloud:containers
+  - cloud:docker
+dependencies: []
+
+

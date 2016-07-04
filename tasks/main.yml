@@ -1,0 +1,47 @@
+---
+  - name: update apt
+    apt: update_cache=yes
+
+  - name: install docker dependencies
+    apt: pkg={{item}} state=installed
+    with_items:
+      - apt-transport-https
+      - ca-certificates
+
+  - name: add doker repo gpg key
+    apt_key: keyserver=hkp://p80.pool.sks-keyservers.net:80 id=58118E89F3A912897C070ADBF76221572C52609D
+    become: yes
+
+  - name: add doker repo
+    apt_repository:
+      repo: 'deb https://apt.dockerproject.org/repo ubuntu-trusty main'
+      mode: '644'
+      update_cache: yes
+      state: present
+
+  - name: install linux image extras
+    apt: pkg='linux-image-extra-{{ansible_kernel}}' state=installed
+
+  - name: install docker
+    apt: pkg='docker-engine' state=installed
+
+  - name: create docker group
+    group: name=docker state=present
+
+  - name: add box user to docker group
+    user: name={{box_user}} groups=docker append=yes
+
+  - name: install console docker helpers
+    copy: src=docker_helpers.sh dest='/home/{{box_user}}/docker_helpers.sh' owner={{box_user}} mode=755
+
+  - name: add docker helpers to session startup
+    lineinfile: dest='/home/{{box_user}}/.profile' line='source /home/{{box_user}}/docker_helpers.sh' state=present
+
+
+  - name: tell firewall (ufw) not to drop forwarding
+    replace: dest=/etc/default/ufw regexp='DEFAULT_FORWARD_POLICY="DROP"' replace='DEFAULT_FORWARD_POLICY="ACCEPT"'
+    register: firewall_updated
+    notify: restart firewall
+
+  - name: ensure docker runs on startup
+    service: name=docker enabled=yes
