@@ -3,10 +3,13 @@
     apt: update_cache=yes
 
   - name: install docker dependencies
-    apt: pkg={{item}} state=installed
-    with_items:
-      - apt-transport-https
-      - ca-certificates
+    apt: 
+      state: present
+    pkg: [
+      'apt-transport-https',
+      'ca-certificates'
+    ]
+
 
   - name: add doker repo gpg key
     apt_key: keyserver=hkp://p80.pool.sks-keyservers.net:80 id=58118E89F3A912897C070ADBF76221572C52609D
@@ -20,10 +23,14 @@
       state: present
 
   - name: install linux image extras
-    apt: pkg='linux-image-extra-{{ansible_kernel}}' state=installed
+    apt: 
+      pkg: 'linux-image-extra-{{ansible_kernel}}'
+      state: present
 
   - name: install docker
-    apt: pkg='docker-engine' state=installed
+    apt: 
+      pkg: 'docker-engine' 
+      state: present
 
   - name: create docker group
     group: name=docker state=present
